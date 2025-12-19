@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetFazTudo - Apoio Educacional</title>
+    <!-- Tailwind CSS para Estilização Moderna e Rápida -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ícones -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Estilos Customizados e Animações */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+        }
+        .hidden-section {
+            display: none;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Navegação -->
+    <nav class="bg-blue-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center cursor-pointer" onclick="app.router('home')">
+                    <i data-lucide="graduation-cap" class="h-8 w-8 mr-2"></i>
+                    <span class="font-bold text-xl tracking-tight">NetFazTudo</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4" id="nav-links">
+                        <!-- Links são injetados via JS dependendo do estado de login -->
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-blue-200 hover:text-white hover:bg-blue-700 focus:outline-none">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Menu Mobile -->
+        <div class="hidden md:hidden bg-blue-700" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" id="mobile-nav-links">
+                <!-- Links mobile -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Container Principal -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 min-h-screen">
+        
+        <!-- ================= PÁGINA INICIAL (HOME) ================= -->
+        <section id="home-section" class="fade-in">
+            <div class="text-center py-12 px-4 sm:px-6 lg:px-8">
+                <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                    <span class="block text-blue-600">NetFazTudo</span>
+                    <span class="block text-2xl sm:text-3xl mt-2 text-gray-600">Apoio educacional rápido para suas atividades online</span>
+                </h1>
+                <p class="mt-4 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    Precisa de ajuda com NETESCOLA, cursos FIC ou AVAs? Conectamos você ao suporte necessário para impulsionar seus estudos.
+                </p>
+                <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+                    <div class="rounded-md shadow">
+                        <button onclick="app.router('register')" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
+                            Criar Conta
+                        </button>
+                    </div>
+                    <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                        <button onclick="app.router('login')" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                            Entrar
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-12 border-t border-gray-200 pt-8">
+                    <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold">Plataforma de Apoio Educacional</p>
+                    <p class="text-xs text-gray-400 mt-2">Este serviço oferece suporte e orientação. Não realizamos avaliações no lugar do aluno.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PÁGINA DE LOGIN ================= -->
+        <section id="login-section" class="hidden-section fade-in max-w-md mx-auto bg-white p-8 rounded-xl shadow-md mt-10">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Acesse sua conta</h2>
+            </div>
+            <form id="login-form" class="space-y-6" onsubmit="app.handleLogin(event)">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="login-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="login-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div id="login-error" class="text-red-500 text-sm hidden"></div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <span id="login-btn-text">Entrar</span>
+                    <span id="login-loader" class="loader ml-2 hidden"></span>
+                </button>
+            </form>
+            <p class="mt-4 text-center text-sm text-gray-600">
+                Não tem conta? <a href="#" onclick="app.router('register')" class="font-medium text-blue-600 hover:text-blue-500">Cadastre-se</a>
+            </p>
+        </section>
+
+        <!-- ================= PÁGINA DE CADASTRO ================= -->
+        <section id="register-section" class="hidden-section fade-in max-w-md mx-auto bg-white p-8 rounded-xl shadow-md mt-10">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Crie sua conta</h2>
+                <p class="text-xs text-gray-500 mt-1">Dica: Use "admin" no email para testar o painel administrativo.</p>
+            </div>
+            <form id="register-form" class="space-y-6" onsubmit="app.handleRegister(event)">
+                <div>
+                    <label for="reg-name" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                    <input type="text" id="reg-name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="reg-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="reg-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="reg-password" class="block text-sm font-medium text-gray-700">Senha (mín. 6 caracteres)</label>
+                    <input type="password" id="reg-password" required minlength="6" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div id="reg-error" class="text-red-500 text-sm hidden"></div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <span id="reg-btn-text">Criar Conta</span>
+                    <span id="reg-loader" class="loader ml-2 hidden"></span>
+                </button>
+            </form>
+            <p class="mt-4 text-center text-sm text-gray-600">
+                Já tem conta? <a href="#" onclick="app.router('login')" class="font-medium text-blue-600 hover:text-blue-500">Faça Login</a>
+            </p>
+        </section>
+
+        <!-- ================= PAINEL DO USUÁRIO ================= -->
+        <section id="user-dashboard-section" class="hidden-section fade-in">
+            <div class="flex justify-between items-center mb-6 px-4 sm:px-0">
+                <h2 class="text-2xl font-bold text-gray-800">Meus Pedidos</h2>
+                <button onclick="app.toggleModal('new-request-modal', true)" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i> Novo Pedido
+                </button>
+            </div>
+
+            <!-- Lista de Pedidos -->
+            <div id="user-requests-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-0">
+                <!-- Cards serão injetados aqui -->
+                <div class="col-span-full text-center py-10 text-gray-500">
+                    Carregando pedidos...
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAINEL DO ADMIN ================= -->
+        <section id="admin-dashboard-section" class="hidden-section fade-in">
+            <div class="mb-8 bg-white p-6 rounded-lg shadow">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Painel Administrativo</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <span class="block text-3xl font-bold text-blue-600" id="stat-total">0</span>
+                        <span class="text-sm text-gray-600">Total Pedidos</span>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <span class="block text-3xl font-bold text-yellow-600" id="stat-pending">0</span>
+                        <span class="text-sm text-gray-600">Pendentes</span>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <span class="block text-3xl font-bold text-green-600" id="stat-completed">0</span>
+                        <span class="text-sm text-gray-600">Finalizados</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul id="admin-requests-list" class="divide-y divide-gray-200">
+                    <!-- Lista Admin injetada aqui -->
+                    <li class="px-4 py-4 sm:px-6 text-center text-gray-500">Carregando gerenciador...</li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODAL NOVO PEDIDO ================= -->
+    <div id="new-request-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="app.toggleModal('new-request-modal', false)"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Solicitar Apoio Educacional</h3>
+                            <div class="mt-2">
+                                <form id="new-request-form" class="space-y-4" onsubmit="app.handleNewRequest(event)">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Plataforma</label>
+                                        <select id="req-plataforma" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <option value="NETESCOLA">NETESCOLA</option>
+                                            <option value="FIC">Cursos FIC</option>
+                                            <option value="AVA">AVA / Moodle</option>
+                                            <option value="OUTRO">Outro</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Curso / Matéria</label>
+                                        <input type="text" id="req-curso" required placeholder="Ex: Matemática ou Técnico em Informática" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Descrição da Atividade</label>
+                                        <textarea id="req-descricao" required rows="3" placeholder="Descreva o que precisa de ajuda..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Anexar Arquivo (Opcional)</label>
+                                        <input type="file" id="req-arquivo" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    </div>
+                                    <div id="req-error" class="text-red-500 text-sm hidden"></div>
+                                    <div class="flex justify-end pt-4">
+                                        <button type="button" onclick="app.toggleModal('new-request-modal', false)" class="mr-3 inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200">
+                                            Cancelar
+                                        </button>
+                                        <button type="submit" class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
+                                            <span id="req-btn-text">Enviar Pedido</span>
+                                            <span id="req-loader" class="loader ml-2 hidden" style="border-top-color: white; width: 16px; height: 16px;"></span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts do Firebase e Lógica da Aplicação -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDoc, getDocs, doc, setDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        // CONFIGURAÇÃO DO FIREBASE (Fornecida pelo usuário)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA43oMYYY58MkN5DbyQkQcf9sjDW13MA90",
+            authDomain: "netfaztudo.firebaseapp.com",
+            projectId: "netfaztudo",
+            storageBucket: "netfaztudo.firebasestorage.app",
+            messagingSenderId: "893513517182",
+            appId: "1:893513517182:web:71d83eb138a3738bb7302f"
+        };
+
+        // Inicialização
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const db = getFirestore(firebaseApp);
+        const storage = getStorage(firebaseApp);
+
+        // Estado Global
+        const state = {
+            user: null,
+            userProfile: null,
+            requests: []
+        };
+
+        // UI Helpers
+        const ui = {
+            show: (id) => document.getElementById(id).classList.remove('hidden'),
+            hide: (id) => document.getElementById(id).classList.add('hidden'),
+            setHTML: (id, html) => document.getElementById(id).innerHTML = html,
+            setText: (id, text) => document.getElementById(id).textContent = text,
+            toggleSection: (sectionId) => {
+                document.querySelectorAll('section').forEach(el => el.classList.add('hidden-section'));
+                document.getElementById(sectionId + '-section').classList.remove('hidden-section');
+            },
+            toggleLoader: (btnTextId, loaderId, isLoading) => {
+                if (isLoading) {
+                    ui.hide(btnTextId);
+                    ui.show(loaderId);
+                } else {
+                    ui.show(btnTextId);
+                    ui.hide(loaderId);
+                }
+            }
+        };
+
+        // Função Principal da Aplicação
+        window.app = {
+            // Roteamento Simples
+            router: (route) => {
+                console.log("Navegando para:", route);
+                
+                // Atualizar Menu
+                const isAuth = !!state.user;
+                const isAdmin = state.userProfile?.role === 'admin';
+
+                // Renderizar Navbar Links
+                let navHTML = '';
+                let mobileNavHTML = '';
+                
+                if (isAuth) {
+                    const dashboardRoute = isAdmin ? 'admin-dashboard' : 'user-dashboard';
+                    navHTML += `<a onclick="app.router('${dashboardRoute}')" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Painel</a>`;
+                    navHTML += `<button onclick="app.logout()" class="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md text-sm font-medium ml-4">Sair</button>`;
+                    
+                    mobileNavHTML += `<a onclick="app.router('${dashboardRoute}')" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Painel</a>`;
+                    mobileNavHTML += `<button onclick="app.logout()" class="text-gray-300 hover:bg-red-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left">Sair</button>`;
+                } else {
+                    navHTML += `<a onclick="app.router('login')" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Entrar</a>`;
+                    navHTML += `<a onclick="app.router('register')" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Cadastrar</a>`;
+                    
+                    mobileNavHTML += `<a onclick="app.router('login')" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Entrar</a>`;
+                    mobileNavHTML += `<a onclick="app.router('register')" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Cadastrar</a>`;
+                }
+                
+                ui.setHTML('nav-links', navHTML);
+                ui.setHTML('mobile-nav-links', mobileNavHTML);
+
+                // Lógica de Exibição de Seção
+                if (route === 'home') {
+                    ui.toggleSection('home');
+                } else if (route === 'login') {
+                    if (isAuth) app.router(isAdmin ? 'admin-dashboard' : 'user-dashboard');
+                    else ui.toggleSection('login');
+                } else if (route === 'register') {
+                    if (isAuth) app.router(isAdmin ? 'admin-dashboard' : 'user-dashboard');
+                    else ui.toggleSection('register');
+                } else if (route === 'user-dashboard') {
+                    if (!isAuth) app.router('login');
+                    else if (isAdmin) app.router('admin-dashboard');
+                    else {
+                        ui.toggleSection('user-dashboard');
+                        app.fetchUserRequests();
+                    }
+                } else if (route === 'admin-dashboard') {
+                    if (!isAuth) app.router('login');
+                    else if (!isAdmin) app.router('user-dashboard'); // Bloqueia não-admin
+                    else {
+                        ui.toggleSection('admin-dashboard');
+                        app.fetchAllRequests();
+                    }
+                }
+                
+                // Reinicializa ícones Lucide
+                lucide.createIcons();
+            },
+
+            // Autenticação: Login
+            handleLogin: async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                ui.toggleLoader('login-btn-text', 'login-loader', true);
+                ui.hide('login-error');
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // O onAuthStateChanged vai lidar com o redirecionamento
+                } catch (error) {
+                    ui.setText('login-error', 'Erro ao entrar: ' + app.translateAuthError(error.code));
+                    ui.show('login-error');
+                    ui.toggleLoader('login-btn-text', 'login-loader', false);
+                }
+            },
+
+            // Autenticação: Cadastro
+            handleRegister: async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('reg-name').value;
+                const email = document.getElementById('reg-email').value;
+                const password = document.getElementById('reg-password').value;
+                
+                ui.toggleLoader('reg-btn-text', 'reg-loader', true);
+                ui.hide('reg-error');
+
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+
+                    // Definição de Role (Lógica simples para demonstração)
+                    const role = email.toLowerCase().includes('admin') ? 'admin' : 'user';
+
+                    // Salvar no Firestore
+                    await setDoc(doc(db, "users", user.uid), {
+                        nome: name,
+                        email: email,
+                        role: role,
+                        criadoEm: Timestamp.now()
+                    });
+
+                    // onAuthStateChanged vai lidar com o resto
+                } catch (error) {
+                    ui.setText('reg-error', 'Erro ao cadastrar: ' + app.translateAuthError(error.code));
+                    ui.show('reg-error');
+                    ui.toggleLoader('reg-btn-text', 'reg-loader', false);
+                }
+            },
+
+            // Logout
+            logout: async () => {
+                try {
+                    await signOut(auth);
+                    state.user = null;
+                    state.userProfile = null;
+                    app.router('home');
+                } catch (error) {
+                    console.error("Erro ao sair", error);
+                }
+            },
+
+            // Modal Control
+            toggleModal: (modalId, show) => {
+                const el = document.getElementById(modalId);
+                if (show) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            },
+
+            // Criar Novo Pedido
+            handleNewRequest: async (e) => {
+                e.preventDefault();
+                ui.toggleLoader('req-btn-text', 'req-loader', true);
+                ui.hide('req-error');
+
+                const plataforma = document.getElementById('req-plataforma').value;
+                const curso = document.getElementById('req-curso').value;
+                const descricao = document.getElementById('req-descricao').value;
+                const fileInput = document.getElementById('req-arquivo');
+                
+                let fileUrl = null;
+
+                try {
+                    // Upload de Arquivo (Se houver)
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        // Referência: users/UID/timestamp_nomearquivo
+                        const storageRef = ref(storage, `uploads/${state.user.uid}/${Date.now()}_${file.name}`);
+                        try {
+                            const snapshot = await uploadBytes(storageRef, file);
+                            fileUrl = await getDownloadURL(snapshot.ref);
+                        } catch (storageError) {
+                            console.error("Erro no Storage:", storageError);
+                            // Continua sem o arquivo se falhar (ex: CORS ou Permissão)
+                            alert("Não foi possível enviar o arquivo devido a restrições de rede, mas o pedido será criado.");
+                        }
+                    }
+
+                    // Salvar Pedido no Firestore
+                    await addDoc(collection(db, "pedidos"), {
+                        userId: state.user.uid,
+                        userName: state.userProfile.nome,
+                        plataforma: plataforma,
+                        curso: curso,
+                        descricao: descricao,
+                        arquivoUrl: fileUrl,
+                        status: 'Pendente', // Pendente, Em andamento, Finalizado
+                        criadoEm: Timestamp.now()
+                    });
+
+                    // Limpar e Fechar
+                    document.getElementById('new-request-form').reset();
+                    app.toggleModal('new-request-modal', false);
+                    ui.toggleLoader('req-btn-text', 'req-loader', false);
+                    
+                    // Atualizar lista
+                    app.fetchUserRequests();
+
+                } catch (error) {
+                    console.error(error);
+                    ui.setText('req-error', 'Erro ao criar pedido. Tente novamente.');
+                    ui.show('req-error');
+                    ui.toggleLoader('req-btn-text', 'req-loader', false);
+                }
+            },
+
+            // Buscar Pedidos do Usuário
+            fetchUserRequests: async () => {
+                const listEl = document.getElementById('user-requests-list');
+                listEl.innerHTML = '<div class="loader"></div>';
+
+                try {
+                    // Nota: Sem índices compostos, filtramos no cliente para evitar erros no demo
+                    const querySnapshot = await getDocs(collection(db, "pedidos"));
+                    const requests = [];
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        if (data.userId === state.user.uid) {
+                            requests.push({ id: doc.id, ...data });
+                        }
+                    });
+
+                    // Ordenar por data (mais recente primeiro)
+                    requests.sort((a, b) => b.criadoEm.seconds - a.criadoEm.seconds);
+
+                    if (requests.length === 0) {
+                        listEl.innerHTML = '<p class="col-span-full text-center text-gray-500">Você ainda não tem pedidos.</p>';
+                        return;
+                    }
+
+                    listEl.innerHTML = requests.map(req => app.renderRequestCard(req)).join('');
+                    lucide.createIcons();
+
+                } catch (error) {
+                    console.error("Erro ao buscar pedidos:", error);
+                    listEl.innerHTML = '<p class="text-red-500">Erro ao carregar dados.</p>';
+                }
+            },
+
+            // Buscar TODOS os Pedidos (Admin)
+            fetchAllRequests: async () => {
+                const listEl = document.getElementById('admin-requests-list');
+                listEl.innerHTML = '<div class="p-4 text-center"><div class="loader"></div></div>';
+
+                try {
+                    const querySnapshot = await getDocs(collection(db, "pedidos"));
+                    const requests = [];
+                    querySnapshot.forEach((doc) => {
+                        requests.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    // Ordenar
+                    requests.sort((a, b) => b.criadoEm.seconds - a.criadoEm.seconds);
+
+                    // Atualizar Stats
+                    document.getElementById('stat-total').innerText = requests.length;
+                    document.getElementById('stat-pending').innerText = requests.filter(r => r.status === 'Pendente').length;
+                    document.getElementById('stat-completed').innerText = requests.filter(r => r.status === 'Finalizado').length;
+
+                    if (requests.length === 0) {
+                        listEl.innerHTML = '<li class="px-4 py-4 text-gray-500 text-center">Nenhum pedido encontrado.</li>';
+                        return;
+                    }
+
+                    listEl.innerHTML = requests.map(req => app.renderAdminRow(req)).join('');
+                    lucide.createIcons();
+
+                } catch (error) {
+                    console.error(error);
+                    listEl.innerHTML = '<li class="text-red-500 p-4">Erro ao carregar pedidos.</li>';
+                }
+            },
+
+            // Renderização do Card (Usuário)
+            renderRequestCard: (req) => {
+                const statusColor = {
+                    'Pendente': 'bg-yellow-100 text-yellow-800',
+                    'Em andamento': 'bg-blue-100 text-blue-800',
+                    'Finalizado': 'bg-green-100 text-green-800'
+                }[req.status] || 'bg-gray-100 text-gray-800';
+
+                return `
+                    <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex justify-between items-start">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                                    ${req.status}
+                                </span>
+                                <span class="text-xs text-gray-400">
+                                    ${new Date(req.criadoEm.seconds * 1000).toLocaleDateString('pt-BR')}
+                                </span>
+                            </div>
+                            <h3 class="mt-2 text-lg leading-6 font-medium text-gray-900">${req.curso}</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-blue-600 font-semibold">${req.plataforma}</p>
+                            <p class="mt-2 text-sm text-gray-500 line-clamp-3">${req.descricao}</p>
+                            ${req.arquivoUrl ? `
+                                <div class="mt-4">
+                                    <a href="${req.arquivoUrl}" target="_blank" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-500">
+                                        <i data-lucide="paperclip" class="w-4 h-4 mr-1"></i> Ver Anexo
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // Renderização da Linha (Admin)
+            renderAdminRow: (req) => {
+                const statusColor = {
+                    'Pendente': 'bg-yellow-100 text-yellow-800',
+                    'Em andamento': 'bg-blue-100 text-blue-800',
+                    'Finalizado': 'bg-green-100 text-green-800'
+                }[req.status];
+
+                return `
+                    <li>
+                        <div class="block hover:bg-gray-50">
+                            <div class="px-4 py-4 sm:px-6">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-medium text-blue-600 truncate">
+                                        ${req.userName || 'Usuário'} - ${req.curso}
+                                    </p>
+                                    <div class="ml-2 flex-shrink-0 flex">
+                                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
+                                            ${req.status}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-2 sm:flex sm:justify-between">
+                                    <div class="sm:flex">
+                                        <p class="flex items-center text-sm text-gray-500">
+                                            <i data-lucide="layers" class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400"></i>
+                                            ${req.plataforma}
+                                        </p>
+                                        <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                                            <i data-lucide="file-text" class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400"></i>
+                                            ${req.descricao.substring(0, 30)}...
+                                        </p>
+                                    </div>
+                                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                        ${req.arquivoUrl ? `<a href="${req.arquivoUrl}" target="_blank" class="mr-4 text-blue-500 underline">Anexo</a>` : ''}
+                                        
+                                        <!-- Ações Admin -->
+                                        <div class="space-x-2">
+                                            <button onclick="app.updateStatus('${req.id}', 'Em andamento')" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">Iniciar</button>
+                                            <button onclick="app.updateStatus('${req.id}', 'Finalizado')" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">Finalizar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            },
+
+            // Atualizar Status (Admin)
+            updateStatus: async (docId, newStatus) => {
+                if (!confirm(`Mudar status para "${newStatus}"?`)) return;
+                try {
+                    const reqRef = doc(db, "pedidos", docId);
+                    await updateDoc(reqRef, {
+                        status: newStatus
+                    });
+                    app.fetchAllRequests(); // Recarregar lista
+                } catch (error) {
+                    console.error("Erro ao atualizar:", error);
+                    alert("Erro ao atualizar status.");
+                }
+            },
+
+            // Tradução de erros do Firebase Auth
+            translateAuthError: (code) => {
+                switch (code) {
+                    case 'auth/invalid-email': return 'Email inválido.';
+                    case 'auth/user-disabled': return 'Usuário desativado.';
+                    case 'auth/user-not-found': return 'Usuário não encontrado.';
+                    case 'auth/wrong-password': return 'Senha incorreta.';
+                    case 'auth/email-already-in-use': return 'Email já está em uso.';
+                    case 'auth/weak-password': return 'A senha deve ter pelo menos 6 caracteres.';
+                    default: return 'Ocorreu um erro desconhecido.';
+                }
+            }
+        };
+
+        // Observador de Estado de Autenticação (Listener Global)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log("Usuário logado:", user.uid);
+                state.user = user;
+                
+                // Buscar perfil no Firestore para saber a Role
+                try {
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        state.userProfile = docSnap.data();
+                        
+                        // Redirecionar baseado na Role se estiver em páginas públicas
+                        const currentSection = document.querySelector('section:not(.hidden-section)').id;
+                        if (currentSection.includes('login') || currentSection.includes('home') || currentSection.includes('register')) {
+                            app.router(state.userProfile.role === 'admin' ? 'admin-dashboard' : 'user-dashboard');
+                        } else {
+                            // Apenas atualiza o menu se já estiver na dashboard
+                            app.router(state.userProfile.role === 'admin' ? 'admin-dashboard' : 'user-dashboard');
+                        }
+                    } else {
+                        console.error("Perfil de usuário não encontrado no Firestore.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar perfil:", error);
+                }
+            } else {
+                console.log("Nenhum usuário logado");
+                state.user = null;
+                state.userProfile = null;
+                app.router('home');
+            }
+        });
+
+        // Funções Globais para UI (Mobile Menu)
+        window.toggleMobileMenu = () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        };
+
+        // Inicializar ícones na carga inicial
+        lucide.createIcons();
+    </script>
+</body>
+</html>
